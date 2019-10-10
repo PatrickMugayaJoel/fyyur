@@ -205,6 +205,7 @@ class VenueEditForm(FlaskForm):
             ('Electronic', 'Electronic'),
             ('Folk', 'Folk'),
             ('Funk', 'Funk'),
+            ('Swing', 'Swing'),
             ('Hip-Hop', 'Hip-Hop'),
             ('Heavy Metal', 'Heavy Metal'),
             ('Instrumental', 'Instrumental'),

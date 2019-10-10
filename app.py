@@ -48,10 +48,55 @@ class Show(db.Model):
     def __repr__(self):
       return f'<Show: { self.artist.name } at { self.venue.name }>'
 
-    # db.Column('start_time', db.String, default=datetime.utcnow().isoformat())
-    # timestamp = moment.create(datetime.utcnow()).calendar()
-    # moment(that time).unix().format(format_string=None)
-    # from app import db Venue Artist
+class Address(db.Model):
+    __tablename__ = 'address'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    venues = db.relationship('Venue', backref='address', lazy=True)
+
+    def __init__(self, name=None):
+      self.name = name
+
+    def __repr__(self):
+      return self.name
+
+class City(db.Model):
+    __tablename__ = 'city'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    venues = db.relationship('Venue', backref='city', lazy=True)
+    artists = db.relationship('Artist', backref='city', lazy=True)
+
+    def __init__(self, name=None):
+      self.name = name
+
+    def __repr__(self):
+      return self.name
+
+class Genre(db.Model):
+    __tablename__ = 'genre'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+
+    def __repr__(self):
+      return self.name
+
+class State(db.Model):
+    __tablename__ = 'state'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    venues = db.relationship('Venue', backref='state', lazy=True)
+    artists = db.relationship('Artist', backref='state', lazy=True)
+
+    def __init__(self, name=None):
+      self.name = name
+
+    def __repr__(self):
+      return self.name
 
 venue_genres = db.Table('venue_genres',
     db.Column('venue_id', db.Integer, db.ForeignKey('venue.id')),
@@ -63,64 +108,55 @@ artist_genres = db.Table('artist_genres',
     db.Column('genre_id', db.Integer, db.ForeignKey('genre.id'))
 )
 
-class Genre(db.Model):
-    __tablename__ = 'genre'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-
-    def __repr__(self):
-      return f'<Genre: { self.name }>'
-
 class Venue(db.Model):
-    __tablename__ = 'venue'
+  __tablename__ = 'venue'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(120), nullable=False)
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    facebook_link = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    website = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean())
-    seeking_description = db.Column(db.Text())
-    genres = db.relationship("Genre", secondary=venue_genres,
-      backref=db.backref('venues', lazy=True))
-    artists = db.relationship("Artist", secondary='show', viewonly=True)
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String, nullable=False)
+  city_id = db.Column(db.Integer, db.ForeignKey('city.id'), nullable=False)
+  state_id = db.Column(db.Integer, db.ForeignKey('state.id'), nullable=False)
+  address_id = db.Column(db.Integer, db.ForeignKey('address.id'), nullable=False)
+  phone = db.Column(db.String(120))
+  facebook_link = db.Column(db.String(120))
+  image_link = db.Column(db.String(500))
+  website = db.Column(db.String(120))
+  seeking_talent = db.Column(db.Boolean())
+  seeking_description = db.Column(db.Text())
+  genres = db.relationship("Genre", secondary=venue_genres,
+    backref=db.backref('venues', lazy=True))
+  artists = db.relationship("Artist", secondary='show', viewonly=True)
 
-    def add_shows(self, items):
-      for artist, start_time in items:
-        self.shows.append(Show(venue=self, artist=artist, start_time=start_time))
+  def add_shows(self, items):
+    for artist, start_time in items:
+      self.shows.append(Show(venue=self, artist=artist, start_time=start_time))
 
-    def __repr__(self):
-      return f'<Venue { self.name }>'
+  def __repr__(self):
+    return f'<Venue { self.name }>'
 
 class Artist(db.Model):
-    __tablename__ = 'artist'
+  __tablename__ = 'artist'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    facebook_link = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    website = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean())
-    seeking_description = db.Column(db.Text())
-    genres = db.relationship("Genre", secondary=artist_genres,
-      backref=db.backref('artists', lazy=True))
-    venues = db.relationship("Venue", secondary='show', viewonly=True)
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String)
+  city_id = db.Column(db.Integer, db.ForeignKey('city.id'), nullable=False)
+  state_id = db.Column(db.Integer, db.ForeignKey('state.id'), nullable=False)
+  phone = db.Column(db.String(120))
+  genres = db.Column(db.String(120))
+  facebook_link = db.Column(db.String(120))
+  image_link = db.Column(db.String(500))
+  website = db.Column(db.String(120))
+  seeking_venue = db.Column(db.Boolean())
+  seeking_description = db.Column(db.Text())
+  genres = db.relationship("Genre", secondary=artist_genres,
+    backref=db.backref('artists', lazy=True))
+  venues = db.relationship("Venue", secondary='show', viewonly=True)
 
-    def add_shows(self, items):
-      for venue, start_time in items:
-        self.shows.append(Show(venue=venue, artist=self, start_time=start_time))
+  def add_shows(self, items):
+    for venue, start_time in items:
+      self.shows.append(Show(venue=venue, artist=self, start_time=start_time))
 
-    def __repr__(self):
-      return f'<Artist { self.name }>'
+  def __repr__(self):
+    return f'<Artist { self.name }>'
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -152,10 +188,12 @@ def index():
 def venues():
 
   data = []
-  allVenues = db.session.query(Venue)
-  cities = allVenues.with_entities(Venue.city, Venue.state).distinct().all()
-  for city, state in cities:
-    theVenues = db.session.query(Venue).filter_by(city=city).all()
+  allVenues = db.session.query(City).join(Venue).join(State)
+  venues = allVenues.with_entities(City.id, City.name, State.name).distinct().all()
+  for venue in venues:
+    print(venue)
+  for city_id, city, state in venues:
+    theVenues = db.session.query(Venue).filter_by(city_id=city_id).all()
     result = {"city": city, "state": state, "venues": []}
     for venue in theVenues:
       upcoming = db.session.query(Show).filter_by(venue_id = venue.id).filter(
@@ -187,14 +225,6 @@ def search_venues():
   }
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
-# def SerializeList(items):
-#   result = []
-#   for item in items:
-#     obj = item.__dict__
-#     del obj['_sa_instance_state']
-#     result.append(obj)
-#   return result
-
 def formartShows(shows_list):
   new_list = []
   for show in shows_list:
@@ -210,6 +240,9 @@ def formartShows(shows_list):
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   venue = db.session.query(Venue).filter_by(id = venue_id).first()
+  venue.city
+  venue.state
+  venue.address
   
   data = {}
   if venue:
@@ -247,15 +280,25 @@ def create_venue_submission():
   if not form.validate_on_submit():
     return render_template('forms/new_venue.html', form=form)
 
+  city = db.session.query(City).filter_by(name = request.form.get("city")).first()
+  if not city:
+    city = City(request.form.get("city"))
+  address = db.session.query(Address).filter_by(name = request.form.get("address")).first()
+  if not address:
+    address = Address(request.form.get("address"))
+  state = db.session.query(State).filter_by(name = request.form.get("state")).first()
+  if not state:
+    state = State(request.form.get("state"))
+
   try:
     genres = []
     for genre in request.form.getlist("genres"):
       genres.append(Genre(name=genre))
 
     new_venue.name = request.form.get("name")
-    new_venue.city = request.form.get("city")
-    new_venue.state = request.form.get("state")
-    new_venue.address = request.form.get("address")
+    new_venue.city = city
+    new_venue.state = state
+    new_venue.address = address
     new_venue.phone = request.form.get("phone")
     new_venue.facebook_link = request.form.get("facebook_link")
     new_venue.genres = genres
@@ -329,6 +372,8 @@ def formartArtistShows(shows_list):
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
   artist = db.session.query(Artist).filter_by(id = artist_id).first()
+  artist.city
+  artist.state
   
   data = {}
   if artist:
@@ -380,15 +425,22 @@ def edit_artist_submission(artist_id):
   if not form.validate_on_submit():
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
+  city = db.session.query(City).filter_by(name = request.form.get("city")).first()
+  if not city:
+    city = City(request.form.get("city"))
+  state = db.session.query(State).filter_by(name = request.form.get("state")).first()
+  if not state:
+    state = State(request.form.get("state"))
+
   try:
     genres = []
     for genre in request.form.getlist("genres"):
       genres.append(Genre(name=genre))
 
     artist.name = request.form.get("name")
-    artist.city = request.form.get("city")
+    artist.city = city
     artist.phone = request.form.get("phone")
-    artist.state = request.form.get("state")
+    artist.state = state
     artist.facebook_link = request.form.get("facebook_link")
     artist.genres = genres
     artist.image_link = request.form.get("image_link")
@@ -433,15 +485,25 @@ def edit_venue_submission(venue_id):
   if not form.validate_on_submit():
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
+  city = db.session.query(City).filter_by(name = request.form.get("city")).first()
+  if not city:
+    city = City(request.form.get("city"))
+  address = db.session.query(Address).filter_by(name = request.form.get("address")).first()
+  if not address:
+    address = Address(request.form.get("address"))
+  state = db.session.query(State).filter_by(name = request.form.get("state")).first()
+  if not state:
+    state = State(request.form.get("state"))
+
   try:
     genres = []
     for genre in request.form.getlist("genres"):
       genres.append(Genre(name=genre))
 
     venue.name = request.form.get("name")
-    venue.city = request.form.get("city")
-    venue.state = request.form.get("state")
-    venue.address = request.form.get("address")
+    venue.city = city
+    venue.state = state
+    venue.address = address
     venue.phone = request.form.get("phone")
     venue.facebook_link = request.form.get("facebook_link")
     venue.genres = genres
@@ -449,6 +511,7 @@ def edit_venue_submission(venue_id):
     venue.website = request.form.get("website")
     venue.seeking_talent = int(request.form.get("seeking_talent"))
     venue.seeking_description = request.form.get("seeking_description")
+    print(venue.address)
 
     db.session.add(venue)
     db.session.commit()
@@ -474,15 +537,22 @@ def create_artist_submission():
   if not form.validate_on_submit():
     return render_template('forms/new_artist.html', form=form)
 
+  city = db.session.query(City).filter_by(name = request.form.get("city")).first()
+  if not city:
+    city = City(request.form.get("city"))
+  state = db.session.query(State).filter_by(name = request.form.get("state")).first()
+  if not state:
+    state = State(request.form.get("state"))
+
   try:
     genres = []
     for genre in request.form.getlist("genres"):
       genres.append(Genre(name=genre))
 
     artist.name = request.form.get("name")
-    artist.city = request.form.get("city")
+    artist.city = city
     artist.phone = request.form.get("phone")
-    artist.state = request.form.get("state")
+    artist.state = state
     artist.facebook_link = request.form.get("facebook_link")
     artist.genres = genres
 

@@ -4,31 +4,62 @@
   <div class="form-wrapper">
     <form method="post" class="form">
       <h3 class="form-heading">List a new venue <a href="{{ url_for('index') }}" title="Back to homepage"><i class="fa fa-home pull-right"></i></a></h3>
+      {{ form.csrf_token }}
       <div class="form-group">
         <label for="name">Name</label>
-        {{ form.name(class_ = 'form-control', autofocus = true) }}
+        <ul>
+            {% for error in form.name.errors %}
+              <li style="color: red;">{{ error }} </li>
+            {% endfor %}
+        </ul>
+        {{ form.name(class_ = 'form-control', placeholder='Name', autofocus = true) }}
       </div>
       <div class="form-group">
           <label>City & State</label>
           <div class="form-inline">
             <div class="form-group">
+              <ul>
+                  {% for error in form.city.errors %}
+                    <li style="color: red;">{{ error }} </li>
+                  {% endfor %}
+              </ul>
               {{ form.city(class_ = 'form-control', placeholder='City', autofocus = true) }}
             </div>
             <div class="form-group">
+              <ul>
+                  {% for error in form.state.errors %}
+                    <li style="color: red;">{{ error }} </li>
+                  {% endfor %}
+              </ul>
               {{ form.state(class_ = 'form-control', placeholder='State', autofocus = true) }}
             </div>
           </div>
       </div>
       <div class="form-group">
-        <label for="address">Address</label>
-        {{ form.address(class_ = 'form-control', autofocus = true) }}
+          <label for="address">Address</label>
+          <ul>
+              {% for error in form.address.errors %}
+                <li style="color: red;">{{ error }} </li>
+              {% endfor %}
+          </ul>
+        {{ form.address(class_ = 'form-control', placeholder='Address', autofocus = true) }}
       </div>
       <div class="form-group">
           <label for="phone">Phone</label>
+          <ul>
+              {% for error in form.phone.errors %}
+                <li style="color: red;">{{ error }} </li>
+              {% endfor %}
+          </ul>
           {{ form.phone(class_ = 'form-control', placeholder='xxx-xxx-xxxx', autofocus = true) }}
         </div>
       <div class="form-group">
-        <label for="genres">Genres</label>
+          <label for="genres">Genres</label>
+          <ul>
+              {% for error in form.genres.errors %}
+                <li style="color: red;">{{ error }} </li>
+              {% endfor %}
+          </ul>
         <small>Ctrl+Click to select multiple</small>
         {{ form.genres(class_ = 'form-control', placeholder='Genres, separated by commas', id=form.state, autofocus = true) }}
       </div>
